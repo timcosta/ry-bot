@@ -20,7 +20,7 @@ const purposeSkipTag = '//archivebot-skip';
 const warningTag = '//archivebot-warning';
 
 const WarningMessage = `
-Hey friends :wave:! This channel seems to be inactive, and is now scheduled to be archived in about a day.
+Hey friends :wave:! This channel seems to be inactive, and is now scheduled to be archived in three days.
 
 What does archiving a channel mean? It means the channel is still searchable, all of the history is still available, but it won't show up in searches or channel listings anymore.
 

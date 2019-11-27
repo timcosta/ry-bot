@@ -42,5 +42,4 @@ spec:
             command:
               - node
               - index.js
-              - --dry-run
           restartPolicy: OnFailure
