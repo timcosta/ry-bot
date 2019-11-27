@@ -1,0 +1,46 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: remote-year
+
+
+---
+apiVersion: 'kubernetes-client.io/v1'
+kind: ExternalSecret
+metadata:
+  name: ry-bot
+  namespace: remote-year
+secretDescriptor:
+  backendType: systemManager
+  data:
+    - key: /remoteyear/slack_personal_token
+      name: SLACK_TOKEN
+
+
+---
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: archive-bot
+  namespace: remote-year
+spec:
+  schedule: "10 */2 * * *"
+  failedJobsHistoryLimit: 10
+  successfulJobsHistoryLimit: 10
+  concurrencyPolicy: Forbid
+  # suspend: true
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: bot
+            image: 177042114872.dkr.ecr.us-east-1.amazonaws.com/remoteyear/ry-bot:latest
+            envFrom:
+            - secretRef:
+                name: ry-bot
+            command:
+              - node
+              - index.js
+              - --dry-run
+          restartPolicy: OnFailure
