@@ -78,10 +78,10 @@ const sendWarningToChannel = async (id) => {
 }
 
 const slackTSToDate = (ts) => new Date(parseInt(ts.split('.')[0], 10) * 1000);
-const dateToSlackTS = (date) => (date.getTime() / 1000).toString();
+// const dateToSlackTS = (date) => `${Math.floor(date.getTime() / 1000).toString()}.000000`;
 
 const warnThenArchive = async (channel, messages) => {
-  const warningMessage = messages.find(m => m.text.endsWith(warningTag));
+  const warningMessage = messages.find(m => m.text.indexOf(warningTag) > -1);
   if (!warningMessage) {
     await sendWarningToChannel(channel.id);
     return;
@@ -89,6 +89,8 @@ const warnThenArchive = async (channel, messages) => {
   const diff = Date.now() - slackTSToDate(warningMessage.ts).getTime();
   if (diff > threeDaysMS) {
     await archiveChannel(channel.id);
+  } else {
+    console.log('\tWarning message sent already, archive pending...');
   }
 }
 
@@ -107,12 +109,13 @@ const execute = async () => {
       return;
     }
     await Hoek.wait(1000);
-    const messages = await Client.paginate('conversations.history', { channel: channel.id, oldest: dateToSlackTS(new Date(oneYearAgo)) }, historyPaginateStopPredicate, (acc=[], page) => [...acc, ...page.messages]);
-    const nonBotMessages = messages.filter(m => !m.subtype);
+    const messages = await Client.paginate('conversations.history', { channel: channel.id }, historyPaginateStopPredicate, (acc=[], page) => [...acc, ...page.messages]);
+    const messagesInLastYear = messages.filter(m => slackTSToDate(m.ts).getTime() > oneYearAgo);
+    const nonBotMessages = messagesInLastYear.filter(m => !m.subtype);
     // if no non-bot messages in the last year, archive it
     if (nonBotMessages.length === 0) {
       console.log(`${channel.name} has no activity in the last year.`)
-      await warnThenArchive(channel, messages);
+      await warnThenArchive(channel, messagesInLastYear);
       return;
     }
     const mostRecentMessage = nonBotMessages[0];
@@ -120,7 +123,7 @@ const execute = async () => {
     const diff = Date.now() - dateOfMostRecent.getTime();
     if (diff > twoWeeksMS && channel.num_members < 5) {
       console.log(`${channel.name} has fewer than 5 members and no activity in the last two weeks.`);
-      await warnThenArchive(channel, messages);
+      await warnThenArchive(channel, messagesInLastYear);
       return;
     }
   }, { concurrency: 1 });
