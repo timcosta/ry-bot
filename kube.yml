@@ -24,7 +24,7 @@ metadata:
   name: archive-bot
   namespace: remote-year
 spec:
-  schedule: "10 */2 * * *"
+  schedule: "10 0 * * *"
   failedJobsHistoryLimit: 10
   successfulJobsHistoryLimit: 10
   concurrencyPolicy: Forbid

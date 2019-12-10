@@ -16,6 +16,7 @@ const WHITELIST = [
   'slackhelp',
 ];
 
+const minMembers = 3;
 const purposeSkipTag = '//archivebot-skip';
 const warningTag = '//archivebot-warning';
 
@@ -121,8 +122,8 @@ const execute = async () => {
     const mostRecentMessage = nonBotMessages[0];
     const dateOfMostRecent = slackTSToDate(mostRecentMessage.ts);
     const diff = Date.now() - dateOfMostRecent.getTime();
-    if (diff > twoWeeksMS && channel.num_members < 5) {
-      console.log(`${channel.name} has fewer than 5 members and no activity in the last two weeks.`);
+    if (diff > twoWeeksMS && channel.num_members <= minMembers) {
+      console.log(`${channel.name} has ${minMembers} or fewer members and no activity in the last two weeks.`);
       await warnThenArchive(channel, messagesInLastYear);
       return;
     }
