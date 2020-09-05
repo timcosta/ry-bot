@@ -10,7 +10,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@hapi/hoek": "^8.5.0",
+    "@hapi/hoek": "^9.0.4",
     "@hapi/wreck": "^16.0.1",
     "@slack/web-api": "^5.5.0",
     "bluebird": "^3.7.1"
